@@ -26,11 +26,25 @@ const sharedPostProcess: Fig.Generator["postProcess"] = (out) => {
 
 const dockerGenerators: Record<string, Fig.Generator> = {
   runningDockerContainers: {
-    script: ["docker", "ps", "--format", "{{ json . }}"],
+    // Only request Names/Image. Using "{{ json . }}" serializes the .Size
+    // field, which forces docker to compute each container's on-disk size —
+    // very slow with many/large containers and blows the generator timeout.
+    script: [
+      "docker",
+      "ps",
+      "--format",
+      '{"Names":{{json .Names}},"Image":{{json .Image}}}',
+    ],
     postProcess: postProcessDockerPs,
   },
   allDockerContainers: {
-    script: ["docker", "ps", "-a", "--format", "{{ json . }}"],
+    script: [
+      "docker",
+      "ps",
+      "-a",
+      "--format",
+      '{"Names":{{json .Names}},"Image":{{json .Image}}}',
+    ],
     postProcess: postProcessDockerPs,
   },
   pausedDockerContainers: {
@@ -40,7 +54,7 @@ const dockerGenerators: Record<string, Fig.Generator> = {
       "--filter",
       "status=paused",
       "--format",
-      "{{ json . }}",
+      '{"Names":{{json .Names}},"Image":{{json .Image}}}',
     ],
     postProcess: postProcessDockerPs,
   },
