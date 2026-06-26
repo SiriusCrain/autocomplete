@@ -567,6 +567,10 @@ const completion: Fig.Spec = {
           description:
             "Toggles local vendor folder usage for remote modules and a node_modules folder for npm packages [possible values: true, false]",
         },
+        {
+          name: "--declaration",
+          description: "Generate .d.ts declaration files alongside the bundle",
+        },
       ],
       args: [
         {
@@ -1298,6 +1302,11 @@ const completion: Fig.Spec = {
           description:
             'Ignore file system read access with a `NotFound` error. Optionally specify ignored paths. --ignore-read | --ignore-read="/etc,/var/log.txt" DENO_TRACE_PERMISSIONS Environmental variable to enable stack traces in permission prompts. DENO_TRACE_PERMISSIONS=1 deno run main.ts DENO_AUDIT_PERMISSIONS Environmental variable to audit all permissions accesses. Set to a file path for JSONL output, or "otel" to emit as OpenTelemetry log events via the configured OTel exporter. DENO_AUDIT_PERMISSIONS=./audit.jsonl deno run main.ts DENO_AUDIT_PERMISSIONS=otel deno run main.ts',
         },
+        {
+          name: "--app-name",
+          description:
+            "Stable identity for the compiled app. Determines where origin-bound storage such as the default `Deno.openKv()`, `localStorage` and `caches` is persisted (under the platform's app data directory). Defaults to the output file name. Set this to keep storage stable across renames",
+        },
       ],
       args: {
         name: "script_arg",
@@ -1399,6 +1408,11 @@ const completion: Fig.Spec = {
           name: "--html",
           description:
             "Output coverage report in HTML format in the given directory",
+        },
+        {
+          name: "--threshold",
+          description:
+            'Fail if coverage is below this percentage (0-100), applied to line, branch, and function coverage. Per-metric thresholds can be set in deno.json under "coverage": { "thresholds": { ... } }. The flag takes precedence',
         },
       ],
       args: {
@@ -1890,6 +1904,11 @@ const completion: Fig.Spec = {
         {
           name: "--watch-exclude",
           description: "Exclude provided files/patterns from watch mode",
+        },
+        {
+          name: "--no-editorconfig",
+          description:
+            "Don't read .editorconfig files to infer formatting options [default: false]",
         },
       ],
       args: {
@@ -3416,6 +3435,16 @@ const completion: Fig.Spec = {
           description:
             "Sets the linker mode for npm packages (isolated or hoisted)",
         },
+        {
+          name: ["-j", "--jobs"],
+          description:
+            "Maximum number of tasks to run concurrently. Overrides the DENO_JOBS environment variable; defaults to the number of available CPUs. Use 1 to force sequential execution. Only affects runs where multiple tasks can run concurrently (workspace runs, or a task with parallelizable dependencies) [aliases: --concurrency]",
+        },
+        {
+          name: "--if-present",
+          description:
+            "Exit with code 0 instead of an error when the task is not found",
+        },
       ],
       args: [
         {
@@ -3896,6 +3925,41 @@ const completion: Fig.Spec = {
           name: "--ignore-read",
           description:
             'Ignore file system read access with a `NotFound` error. Optionally specify ignored paths. --ignore-read | --ignore-read="/etc,/var/log.txt" DENO_TRACE_PERMISSIONS Environmental variable to enable stack traces in permission prompts. DENO_TRACE_PERMISSIONS=1 deno run main.ts DENO_AUDIT_PERMISSIONS Environmental variable to audit all permissions accesses. Set to a file path for JSONL output, or "otel" to emit as OpenTelemetry log events via the configured OTel exporter. DENO_AUDIT_PERMISSIONS=./audit.jsonl deno run main.ts DENO_AUDIT_PERMISSIONS=otel deno run main.ts',
+        },
+        {
+          name: ["-u", "--update-snapshots"],
+          description:
+            "Update snapshots created with `t.assertSnapshot()` instead of failing when they do not match",
+        },
+        {
+          name: "--changed",
+          description:
+            "Run only test modules affected by files changed in git. With no value, uses uncommitted changes (staged, unstaged and untracked). Pass a git ref to compare against, e.g. --changed=main or --changed=HEAD~1",
+        },
+        {
+          name: "--coverage-threshold",
+          description:
+            "Fail if coverage is below this percentage (0-100). Requires --coverage",
+        },
+        {
+          name: "--related",
+          description:
+            "Run only test modules that depend on the given source files",
+        },
+        {
+          name: "--repeats",
+          description:
+            "Run each test NUMBER additional times. Every repetition must pass. Tests that set their own `repeats` option take precedence",
+        },
+        {
+          name: "--retry",
+          description:
+            "Re-run failing tests up to NUMBER times. A test passes if any attempt passes. Tests that set their own `retry` option take precedence",
+        },
+        {
+          name: "--shard",
+          description:
+            "Run only the test files for shard INDEX of COUNT, e.g. --shard=2/3. The discovered test files are sorted and split into COUNT consecutive groups; INDEX is 1-based. Useful for splitting a run across machines",
         },
       ],
       args: [
@@ -4499,6 +4563,11 @@ const completion: Fig.Spec = {
           name: "--no-lock",
           description: "Disable auto discovery of the lock file",
         },
+        {
+          name: ["-g", "--global"],
+          description: "Remove globally installed package or module",
+        },
+        { name: "--root", description: "Installation root" },
       ],
     },
     {
@@ -5283,6 +5352,693 @@ const completion: Fig.Spec = {
       name: "sandbox",
       description:
         "\u001b[1mUsage:\u001b[22m   \u001b[95mdeno sandbox\u001b[39m",
+    },
+    {
+      name: "watch",
+      description:
+        "Run a JavaScript or TypeScript program, watching for file changes and hot-replacing modules",
+      options: [
+        {
+          name: ["-c", "--config"],
+          description:
+            "Configure different aspects of deno including TypeScript, linting, and code formatting. Typically the configuration file will be called `deno.json` or `deno.jsonc` and automatically detected; in that case this flag is not necessary. Docs: https://docs.deno.com/go/config",
+        },
+        {
+          name: ["-h", "--help"],
+          description: "[possible values: unstable, full]",
+        },
+        { name: ["-q", "--quiet"], description: "Suppress diagnostic output" },
+        {
+          name: ["-t", "--tunnel"],
+          description: "Execute tasks with a tunnel to Deno Deploy",
+        },
+        {
+          name: ["-r", "--reload"],
+          description:
+            "Reload source code cache (recompile TypeScript). With no value, reloads everything. Pass a comma-separated list of specifiers to reload only those modules; npm: reloads all npm modules; npm:chalk reloads a single npm module; jsr:@std/http/file-server,jsr:@std/assert/assert-equals reloads specific modules",
+        },
+        { name: ["-A", "--allow-all"], description: "Allow all permissions" },
+        {
+          name: ["-P", "--permission-set"],
+          description: "Loads the permission set from the config file",
+        },
+        {
+          name: ["-R", "--allow-read"],
+          description:
+            'Allow file system read access. Optionally specify allowed paths. --allow-read | --allow-read="/etc,/var/log.txt"',
+        },
+        {
+          name: ["-W", "--allow-write"],
+          description:
+            'Allow file system write access. Optionally specify allowed paths. --allow-write | --allow-write="/etc,/var/log.txt"',
+        },
+        {
+          name: ["-I", "--allow-import"],
+          description:
+            'Allow importing from remote hosts. Optionally specify allowed IP addresses and host names, with ports as necessary. Default value: deno.land:443,jsr.io:443,esm.sh:443,raw.esm.sh:443,cdn.jsdelivr.net:443,raw.githubusercontent.com:443,gist.githubusercontent.com:443 --allow-import | --allow-import="example.com,github.com"',
+        },
+        {
+          name: ["-N", "--allow-net"],
+          description:
+            'Allow network access. Optionally specify allowed IP addresses and host names, with ports as necessary. A Unix domain socket can be scoped with unix:<absolute-path>. --allow-net | --allow-net="localhost:8080,deno.land" | --allow-net="unix:/var/run/docker.sock"',
+        },
+        {
+          name: ["-E", "--allow-env"],
+          description:
+            'Allow access to environment variables. Optionally specify accessible environment variables. --allow-env | --allow-env="PORT,HOME,PATH"',
+        },
+        {
+          name: ["-S", "--allow-sys"],
+          description:
+            'Allow access to OS information. Optionally allow specific APIs by function name. --allow-sys | --allow-sys="systemMemoryInfo,osRelease"',
+        },
+        {
+          name: "--allow-scripts",
+          description:
+            "Allow running npm lifecycle scripts for the given packages Note: Scripts will only be executed when using a node_modules directory (`--node-modules-dir`)",
+        },
+        {
+          name: "--cert",
+          description: "Load certificate authority from PEM encoded file",
+        },
+        {
+          name: "--conditions",
+          description:
+            "Use this argument to specify custom conditions for npm package exports. You can also use DENO_CONDITIONS env var",
+        },
+        {
+          name: "--coverage",
+          description:
+            "Collect coverage profile data into DIR. If DIR is not specified, it uses 'coverage/'. This option can also be set via the DENO_COVERAGE_DIR environment variable",
+        },
+        {
+          name: "--cpu-prof",
+          description:
+            "Start the V8 CPU profiler on startup and write the profile to disk on exit. Profiles are written to the current directory by default",
+        },
+        {
+          name: "--cpu-prof-dir",
+          description:
+            "Directory where the V8 CPU profiles will be written. Implicitly enables --cpu-prof",
+        },
+        {
+          name: "--cpu-prof-flamegraph",
+          description: "Generate an SVG flamegraph alongside the CPU profile",
+        },
+        {
+          name: "--cpu-prof-interval",
+          description: "Sampling interval in microseconds for CPU profiling",
+        },
+        {
+          name: "--cpu-prof-md",
+          description:
+            "Generate a human-readable markdown report alongside the CPU profile",
+        },
+        {
+          name: "--cpu-prof-name",
+          description:
+            "Filename for the CPU profile (defaults to CPU.<timestamp>.<pid>.cpuprofile)",
+        },
+        {
+          name: "--env-file",
+          description:
+            "Load environment variables from local file Only the first environment variable with a given key is used. Existing process environment variables are not overwritten, so if variables with the same names already exist in the environment, their values will be preserved. Where multiple declarations for the same environment variable exist in your .env file, the first one encountered is applied. This is determined by the order of the files you pass as arguments",
+        },
+        {
+          name: "--ext",
+          description:
+            "Set content type of the supplied file [possible values: ts, tsx, js, jsx, mts, mjs, cts, cjs]",
+        },
+        {
+          name: "--location",
+          description: "Value of globalThis.location used by some web APIs",
+        },
+        {
+          name: "--minimum-dependency-age",
+          description:
+            "(Unstable) The age in minutes, ISO-8601 duration or RFC3339 absolute timestamp (e.g. '120' for two hours, 'P2D' for two days, '2025-09-16' for cutoff date, '2025-09-16T12:00:00+00:00' for cutoff time, '0' to disable)",
+        },
+        {
+          name: "--no-code-cache",
+          description: "Disable V8 code cache feature",
+        },
+        {
+          name: "--no-config",
+          description: "Disable automatic loading of the configuration file",
+        },
+        {
+          name: "--preload",
+          description:
+            "A list of files that will be executed before the main module",
+        },
+        {
+          name: "--require",
+          description:
+            "A list of CommonJS modules that will be executed before the main module",
+        },
+        { name: "--seed", description: "Set the random number generator seed" },
+        {
+          name: "--unstable",
+          description:
+            "The `--unstable` flag has been deprecated. Use granular `--unstable-*` flags instead To view the list of individual unstable feature flags, run this command again with --help=unstable",
+        },
+        {
+          name: "--use-env-proxy",
+          description:
+            "Use HTTP_PROXY, HTTPS_PROXY, and NO_PROXY for node:http/node:https",
+        },
+        {
+          name: "--v8-flags",
+          description:
+            "To see a list of all available flags use --v8-flags=--help Flags can also be set via the DENO_V8_FLAGS environment variable. Any flags set with this flag are appended after the DENO_V8_FLAGS environment variable",
+        },
+        {
+          name: "--check",
+          description:
+            "Enable type-checking. This subcommand does not type-check by default; pass --check=all to also type-check remote modules. Alternatively, use the 'deno check' subcommand",
+        },
+        {
+          name: "--no-check",
+          description:
+            'Skip type-checking. If the value of "remote" is supplied, diagnostic errors from remote modules will be ignored',
+        },
+        {
+          name: "--watch-hmr",
+          description:
+            "Watch for file changes and hot-replace modules. The process restarts if hot replacement fails. Local files from entry point module graph are watched by default. Additional paths might be watched by passing them as arguments to this flag",
+        },
+        {
+          name: "--no-clear-screen",
+          description: "Do not clear terminal screen when under watch mode",
+        },
+        {
+          name: "--watch",
+          description:
+            "Watch for file changes and restart process automatically. Local files from entry point module graph are watched by default. Additional paths might be watched by passing them as arguments to this flag",
+        },
+        {
+          name: "--watch-exclude",
+          description: "Exclude provided files/patterns from watch mode",
+        },
+        {
+          name: "--inspect",
+          description:
+            "Activate inspector on host:port [default: 127.0.0.1:9229]. Host and port are optional. Using port 0 will assign a random free port",
+        },
+        {
+          name: "--inspect-brk",
+          description:
+            "Activate inspector on host:port, wait for debugger to connect and break at the start of user script",
+        },
+        {
+          name: "--inspect-wait",
+          description:
+            "Activate inspector on host:port and wait for debugger to connect before running user code",
+        },
+        {
+          name: "--cached-only",
+          description: "Require that remote dependencies are already cached",
+        },
+        {
+          name: "--frozen",
+          description:
+            "Error out if lockfile is out of date [possible values: true, false]",
+        },
+        {
+          name: "--import-map",
+          description:
+            "Load import map file from local file or remote URL Docs: https://docs.deno.com/runtime/manual/basics/import_maps",
+        },
+        {
+          name: "--lock",
+          description:
+            'Check the specified lock file. (If value is not provided, defaults to "./deno.lock")',
+        },
+        {
+          name: "--no-lock",
+          description: "Disable auto discovery of the lock file",
+        },
+        { name: "--no-npm", description: "Do not resolve npm modules" },
+        { name: "--no-remote", description: "Do not resolve remote modules" },
+        {
+          name: "--node-modules-dir",
+          description:
+            "Selects the node_modules directory mode for npm packages (not a path). One of: auto (create a local node_modules directory and install npm packages into it), manual (use the existing local node_modules directory, do not modify it), none (do not use a local node_modules directory; resolve npm packages from the global cache). Defaults to auto when the flag is passed without a value",
+        },
+        {
+          name: "--node-modules-linker",
+          description:
+            "Sets the linker mode for npm packages (isolated or hoisted)",
+        },
+        {
+          name: "--vendor",
+          description:
+            "Toggles local vendor folder usage for remote modules and a node_modules folder for npm packages [possible values: true, false]",
+        },
+        {
+          name: "--no-prompt",
+          description:
+            "Always throw if required permission wasn't passed. Can also be set via the DENO_NO_PROMPT environment variable",
+        },
+        {
+          name: "--allow-run",
+          description:
+            'Allow running subprocesses. Optionally specify allowed runnable program names. --allow-run | --allow-run="whoami,ps"',
+        },
+        {
+          name: "--allow-ffi",
+          description:
+            '(Unstable) Allow loading dynamic libraries. Optionally specify allowed directories or files. --allow-ffi | --allow-ffi="./libfoo.so"',
+        },
+        {
+          name: "--deny-read",
+          description:
+            'Deny file system read access. Optionally specify denied paths. --deny-read | --deny-read="/etc,/var/log.txt"',
+        },
+        {
+          name: "--deny-write",
+          description:
+            'Deny file system write access. Optionally specify denied paths. --deny-write | --deny-write="/etc,/var/log.txt"',
+        },
+        {
+          name: "--deny-net",
+          description:
+            'Deny network access. Optionally specify defined IP addresses and host names, with ports as necessary. --deny-net | --deny-net="localhost:8080,deno.land"',
+        },
+        {
+          name: "--deny-env",
+          description:
+            'Deny access to environment variables. Optionally specify inacessible environment variables. --deny-env | --deny-env="PORT,HOME,PATH"',
+        },
+        {
+          name: "--deny-sys",
+          description:
+            'Deny access to OS information. Optionally deny specific APIs by function name. --deny-sys | --deny-sys="systemMemoryInfo,osRelease"',
+        },
+        {
+          name: "--deny-run",
+          description:
+            'Deny running subprocesses. Optionally specify denied runnable program names. --deny-run | --deny-run="whoami,ps"',
+        },
+        {
+          name: "--deny-ffi",
+          description:
+            '(Unstable) Deny loading dynamic libraries. Optionally specify denied directories or files. --deny-ffi | --deny-ffi="./libfoo.so"',
+        },
+        {
+          name: "--deny-import",
+          description:
+            'Deny importing from remote hosts. Optionally specify denied IP addresses and host names, with ports as necessary. --deny-import | --deny-import="example.com:443,github.com:443"',
+        },
+        {
+          name: "--ignore-env",
+          description:
+            'Ignore access to environment variables returning `undefined`. Optionally specify ignored environment variables. --ignore-env | --ignore-env="PORT,HOME,PATH"',
+        },
+        {
+          name: "--ignore-read",
+          description:
+            'Ignore file system read access with a `NotFound` error. Optionally specify ignored paths. --ignore-read | --ignore-read="/etc,/var/log.txt" DENO_TRACE_PERMISSIONS Environmental variable to enable stack traces in permission prompts. DENO_TRACE_PERMISSIONS=1 deno run main.ts DENO_AUDIT_PERMISSIONS Environmental variable to audit all permissions accesses. Set to a file path for JSONL output, or "otel" to emit as OpenTelemetry log events via the configured OTel exporter. DENO_AUDIT_PERMISSIONS=./audit.jsonl deno run main.ts DENO_AUDIT_PERMISSIONS=otel deno run main.ts',
+        },
+      ],
+    },
+    {
+      name: "unlink",
+      description: "Remove a linked local package from the current project",
+      options: [
+        {
+          name: ["-h", "--help"],
+          description: "[possible values: unstable, full]",
+        },
+        { name: ["-q", "--quiet"], description: "Suppress diagnostic output" },
+        {
+          name: "--lockfile-only",
+          description: "Install only updating the lockfile",
+        },
+        {
+          name: "--frozen",
+          description:
+            "Error out if lockfile is out of date [possible values: true, false]",
+        },
+        {
+          name: "--lock",
+          description:
+            'Check the specified lock file. (If value is not provided, defaults to "./deno.lock")',
+        },
+        {
+          name: "--no-lock",
+          description: "Disable auto discovery of the lock file",
+        },
+      ],
+    },
+    {
+      name: "list",
+      description: "List the dependencies declared in deno.json / package.json",
+      options: [
+        {
+          name: ["-h", "--help"],
+          description: "[possible values: unstable, full]",
+        },
+        { name: ["-q", "--quiet"], description: "Suppress diagnostic output" },
+        {
+          name: ["-r", "--recursive"],
+          description: "Include all workspace members",
+        },
+        {
+          name: "--depth",
+          description:
+            "Maximum depth of the dependency tree to display (0 = direct dependencies only)",
+        },
+        { name: "--dev", description: "Only list development dependencies" },
+        { name: "--prod", description: "Only list production dependencies" },
+      ],
+    },
+    {
+      name: "link",
+      description:
+        "Link a local JSR package into the current project for development",
+      options: [
+        {
+          name: ["-h", "--help"],
+          description: "[possible values: unstable, full]",
+        },
+        { name: ["-q", "--quiet"], description: "Suppress diagnostic output" },
+        {
+          name: "--lockfile-only",
+          description: "Install only updating the lockfile",
+        },
+        {
+          name: "--frozen",
+          description:
+            "Error out if lockfile is out of date [possible values: true, false]",
+        },
+        {
+          name: "--lock",
+          description:
+            'Check the specified lock file. (If value is not provided, defaults to "./deno.lock")',
+        },
+        {
+          name: "--no-lock",
+          description: "Disable auto discovery of the lock file",
+        },
+      ],
+    },
+    {
+      name: "desktop",
+      description: "Build and run desktop applications",
+      options: [
+        {
+          name: ["-c", "--config"],
+          description:
+            "Configure different aspects of deno including TypeScript, linting, and code formatting. Typically the configuration file will be called `deno.json` or `deno.jsonc` and automatically detected; in that case this flag is not necessary. Docs: https://docs.deno.com/go/config",
+        },
+        {
+          name: ["-h", "--help"],
+          description: "[possible values: unstable, full]",
+        },
+        { name: ["-q", "--quiet"], description: "Suppress diagnostic output" },
+        {
+          name: ["-o", "--output"],
+          description:
+            "Output path (e.g. MyApp.app, MyApp.dmg, MyApp.AppImage, MyApp.deb, MyApp.rpm, MyApp.msi)",
+        },
+        {
+          name: ["-r", "--reload"],
+          description:
+            "Reload source code cache (recompile TypeScript). With no value, reloads everything. Pass a comma-separated list of specifiers to reload only those modules; npm: reloads all npm modules; npm:chalk reloads a single npm module; jsr:@std/http/file-server,jsr:@std/assert/assert-equals reloads specific modules",
+        },
+        { name: ["-A", "--allow-all"], description: "Allow all permissions" },
+        {
+          name: ["-P", "--permission-set"],
+          description: "Loads the permission set from the config file",
+        },
+        {
+          name: ["-R", "--allow-read"],
+          description:
+            'Allow file system read access. Optionally specify allowed paths. --allow-read | --allow-read="/etc,/var/log.txt"',
+        },
+        {
+          name: ["-W", "--allow-write"],
+          description:
+            'Allow file system write access. Optionally specify allowed paths. --allow-write | --allow-write="/etc,/var/log.txt"',
+        },
+        {
+          name: ["-I", "--allow-import"],
+          description:
+            'Allow importing from remote hosts. Optionally specify allowed IP addresses and host names, with ports as necessary. Default value: deno.land:443,jsr.io:443,esm.sh:443,raw.esm.sh:443,cdn.jsdelivr.net:443,raw.githubusercontent.com:443,gist.githubusercontent.com:443 --allow-import | --allow-import="example.com,github.com"',
+        },
+        {
+          name: ["-N", "--allow-net"],
+          description:
+            'Allow network access. Optionally specify allowed IP addresses and host names, with ports as necessary. A Unix domain socket can be scoped with unix:<absolute-path>. --allow-net | --allow-net="localhost:8080,deno.land" | --allow-net="unix:/var/run/docker.sock"',
+        },
+        {
+          name: ["-E", "--allow-env"],
+          description:
+            'Allow access to environment variables. Optionally specify accessible environment variables. --allow-env | --allow-env="PORT,HOME,PATH"',
+        },
+        {
+          name: ["-S", "--allow-sys"],
+          description:
+            'Allow access to OS information. Optionally allow specific APIs by function name. --allow-sys | --allow-sys="systemMemoryInfo,osRelease"',
+        },
+        {
+          name: "--allow-scripts",
+          description:
+            "Allow running npm lifecycle scripts for the given packages Note: Scripts will only be executed when using a node_modules directory (`--node-modules-dir`)",
+        },
+        {
+          name: "--cert",
+          description: "Load certificate authority from PEM encoded file",
+        },
+        {
+          name: "--conditions",
+          description:
+            "Use this argument to specify custom conditions for npm package exports. You can also use DENO_CONDITIONS env var",
+        },
+        {
+          name: "--env-file",
+          description:
+            "Load environment variables from local file Only the first environment variable with a given key is used. Existing process environment variables are not overwritten, so if variables with the same names already exist in the environment, their values will be preserved. Where multiple declarations for the same environment variable exist in your .env file, the first one encountered is applied. This is determined by the order of the files you pass as arguments",
+        },
+        {
+          name: "--ext",
+          description:
+            "Set content type of the supplied file [possible values: ts, tsx, js, jsx, mts, mjs, cts, cjs]",
+        },
+        {
+          name: "--location",
+          description: "Value of globalThis.location used by some web APIs",
+        },
+        {
+          name: "--minimum-dependency-age",
+          description:
+            "(Unstable) The age in minutes, ISO-8601 duration or RFC3339 absolute timestamp (e.g. '120' for two hours, 'P2D' for two days, '2025-09-16' for cutoff date, '2025-09-16T12:00:00+00:00' for cutoff time, '0' to disable)",
+        },
+        {
+          name: "--no-code-cache",
+          description: "Disable V8 code cache feature",
+        },
+        {
+          name: "--no-config",
+          description: "Disable automatic loading of the configuration file",
+        },
+        {
+          name: "--preload",
+          description:
+            "A list of files that will be executed before the main module",
+        },
+        {
+          name: "--require",
+          description:
+            "A list of CommonJS modules that will be executed before the main module",
+        },
+        { name: "--seed", description: "Set the random number generator seed" },
+        {
+          name: "--unstable",
+          description:
+            "The `--unstable` flag has been deprecated. Use granular `--unstable-*` flags instead To view the list of individual unstable feature flags, run this command again with --help=unstable",
+        },
+        {
+          name: "--v8-flags",
+          description:
+            "To see a list of all available flags use --v8-flags=--help Flags can also be set via the DENO_V8_FLAGS environment variable. Any flags set with this flag are appended after the DENO_V8_FLAGS environment variable",
+        },
+        {
+          name: "--all-targets",
+          description: "Build for all supported target platforms",
+        },
+        {
+          name: "--backend",
+          description:
+            "Backend to use for the desktop app [default: webview] [possible values: webview, cef, raw]",
+        },
+        {
+          name: "--compress",
+          description:
+            "Make the packaged app self-extracting: the payload is compressed inside the app and unpacked on first launch. Off by default. Defaults to xz (decompressed by the system `tar` everywhere); zstd is smaller/faster but needs the `zstd` tool at runtime. [possible values: xz, lzma, zstd]",
+        },
+        {
+          name: "--exclude",
+          description:
+            "Excludes a file/directory in the compiled executable. Use this flag to exclude a specific file or directory within the included files",
+        },
+        {
+          name: "--hmr",
+          description:
+            "Run the desktop app with Hot Module Replacement enabled",
+        },
+        {
+          name: "--icon",
+          description:
+            "Set the application icon (.ico on Windows, .icns or .png on macOS)",
+        },
+        {
+          name: "--include",
+          description:
+            "Includes an additional module or file/directory in the compiled executable. Use this flag if a dynamically imported module or a web worker main module fails to load in the executable or to embed a file or directory in the executable. This flag can be passed multiple times, to include multiple additional modules",
+        },
+        {
+          name: "--target",
+          description:
+            "Target OS architecture [possible values: x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86_64-pc-windows-msvc, x86_64-apple-darwin, aarch64-apple-darwin]",
+        },
+        {
+          name: "--check",
+          description:
+            "Set type-checking behavior. This subcommand type-checks local modules by default, so passing --check is redundant; pass --check=all to also type-check remote modules. Alternatively, use the 'deno check' subcommand",
+        },
+        {
+          name: "--no-check",
+          description:
+            'Skip type-checking. If the value of "remote" is supplied, diagnostic errors from remote modules will be ignored',
+        },
+        {
+          name: "--inspect",
+          description:
+            "Activate inspector on host:port [default: 127.0.0.1:9229]. Host and port are optional. Using port 0 will assign a random free port",
+        },
+        {
+          name: "--inspect-brk",
+          description:
+            "Activate inspector on host:port, wait for debugger to connect and break at the start of user script",
+        },
+        {
+          name: "--inspect-renderer",
+          description:
+            "Override the CEF renderer debugger listen address; defaults to an auto-allocated port",
+        },
+        {
+          name: "--inspect-wait",
+          description:
+            "Activate inspector on host:port and wait for debugger to connect before running user code",
+        },
+        {
+          name: "--cached-only",
+          description: "Require that remote dependencies are already cached",
+        },
+        {
+          name: "--frozen",
+          description:
+            "Error out if lockfile is out of date [possible values: true, false]",
+        },
+        {
+          name: "--import-map",
+          description:
+            "Load import map file from local file or remote URL Docs: https://docs.deno.com/runtime/manual/basics/import_maps",
+        },
+        {
+          name: "--lock",
+          description:
+            'Check the specified lock file. (If value is not provided, defaults to "./deno.lock")',
+        },
+        {
+          name: "--no-lock",
+          description: "Disable auto discovery of the lock file",
+        },
+        { name: "--no-npm", description: "Do not resolve npm modules" },
+        { name: "--no-remote", description: "Do not resolve remote modules" },
+        {
+          name: "--node-modules-dir",
+          description:
+            "Selects the node_modules directory mode for npm packages (not a path). One of: auto (create a local node_modules directory and install npm packages into it), manual (use the existing local node_modules directory, do not modify it), none (do not use a local node_modules directory; resolve npm packages from the global cache). Defaults to auto when the flag is passed without a value",
+        },
+        {
+          name: "--node-modules-linker",
+          description:
+            "Sets the linker mode for npm packages (isolated or hoisted)",
+        },
+        {
+          name: "--vendor",
+          description:
+            "Toggles local vendor folder usage for remote modules and a node_modules folder for npm packages [possible values: true, false]",
+        },
+        {
+          name: "--no-prompt",
+          description:
+            "Always throw if required permission wasn't passed. Can also be set via the DENO_NO_PROMPT environment variable",
+        },
+        {
+          name: "--allow-run",
+          description:
+            'Allow running subprocesses. Optionally specify allowed runnable program names. --allow-run | --allow-run="whoami,ps"',
+        },
+        {
+          name: "--allow-ffi",
+          description:
+            '(Unstable) Allow loading dynamic libraries. Optionally specify allowed directories or files. --allow-ffi | --allow-ffi="./libfoo.so"',
+        },
+        {
+          name: "--deny-read",
+          description:
+            'Deny file system read access. Optionally specify denied paths. --deny-read | --deny-read="/etc,/var/log.txt"',
+        },
+        {
+          name: "--deny-write",
+          description:
+            'Deny file system write access. Optionally specify denied paths. --deny-write | --deny-write="/etc,/var/log.txt"',
+        },
+        {
+          name: "--deny-net",
+          description:
+            'Deny network access. Optionally specify defined IP addresses and host names, with ports as necessary. --deny-net | --deny-net="localhost:8080,deno.land"',
+        },
+        {
+          name: "--deny-env",
+          description:
+            'Deny access to environment variables. Optionally specify inacessible environment variables. --deny-env | --deny-env="PORT,HOME,PATH"',
+        },
+        {
+          name: "--deny-sys",
+          description:
+            'Deny access to OS information. Optionally deny specific APIs by function name. --deny-sys | --deny-sys="systemMemoryInfo,osRelease"',
+        },
+        {
+          name: "--deny-run",
+          description:
+            'Deny running subprocesses. Optionally specify denied runnable program names. --deny-run | --deny-run="whoami,ps"',
+        },
+        {
+          name: "--deny-ffi",
+          description:
+            '(Unstable) Deny loading dynamic libraries. Optionally specify denied directories or files. --deny-ffi | --deny-ffi="./libfoo.so"',
+        },
+        {
+          name: "--deny-import",
+          description:
+            'Deny importing from remote hosts. Optionally specify denied IP addresses and host names, with ports as necessary. --deny-import | --deny-import="example.com:443,github.com:443"',
+        },
+        {
+          name: "--ignore-env",
+          description:
+            'Ignore access to environment variables returning `undefined`. Optionally specify ignored environment variables. --ignore-env | --ignore-env="PORT,HOME,PATH"',
+        },
+        {
+          name: "--ignore-read",
+          description:
+            'Ignore file system read access with a `NotFound` error. Optionally specify ignored paths. --ignore-read | --ignore-read="/etc,/var/log.txt" DENO_TRACE_PERMISSIONS Environmental variable to enable stack traces in permission prompts. DENO_TRACE_PERMISSIONS=1 deno run main.ts DENO_AUDIT_PERMISSIONS Environmental variable to audit all permissions accesses. Set to a file path for JSONL output, or "otel" to emit as OpenTelemetry log events via the configured OTel exporter. DENO_AUDIT_PERMISSIONS=./audit.jsonl deno run main.ts DENO_AUDIT_PERMISSIONS=otel deno run main.ts',
+        },
+      ],
     },
   ],
   options: [

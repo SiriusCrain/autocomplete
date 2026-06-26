@@ -2,10 +2,10 @@
   "compilerOptions": {
     "moduleResolution": "node",
     "outDir": "./build",
-    "target": "ES2018",
+    "target": "ES2022",
     "module": "ESNext",
     "lib": [
-      "ES2018",
+      "ES2022",
       "DOM"
     ],
     "noImplicitAny": false,
