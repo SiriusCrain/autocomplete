@@ -901,6 +901,11 @@ const completion: Fig.Spec = {
           description:
             "Toggles local vendor folder usage for remote modules and a node_modules folder for npm packages [possible values: true, false]",
         },
+        {
+          name: "--desktop",
+          description:
+            "Type-check using the type definitions for `deno desktop`",
+        },
       ],
       args: {
         name: "file",
